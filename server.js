@@ -4,7 +4,7 @@ var url = require('url');
 var async = require('async');
 
 /*
- * Throws a 404 page. If no error string is provided, a default is used.
+ * Serves a 404 page. If no error string is provided, a default is used.
  */
 function redirect404(res, err_str){
     if(typeof(err_str) === 'undefined') err_str = '<h2>URL not found.</h2>';
@@ -12,6 +12,10 @@ function redirect404(res, err_str){
     res.end(err_str);
 }
 
+/*
+ * Given an image name, will find that image in the ./img folder and serve it,
+ * or else serve a 404 page.
+ */
 function serve_img_by_name(urlobj, res){
     if(urlobj.pathname.split('/')[2] == null) {
         redirect404(res);
@@ -31,8 +35,8 @@ function serve_img_by_name(urlobj, res){
 }
 
 /*
- * Upon receiving a /img url, will attempt to find the image at the index of the
- * ID given in the query string like so: /img?id=54
+ * Upon receiving a /img url, will attempt to find the image at the index
+ * given in the URL like so: /img/54
  */
 function serve_img_url(urlobj, res){
     if(urlobj.pathname.split('/')[2] == null) {
@@ -76,8 +80,13 @@ function serve_static_files(urlobj, res){
     });
 }
 
+/*
+ *since we wanted the website to group images by the day we wrote a function take an array of all the filenames
+ *the filenames are comprised of the timestamp so we could isolate different pictures taken the same day
+ *we iterated through the list while counting the number of pictures for one given day
+ *when that day was over we added the number of pictures taken that day to the final array and resumed counting from 0
+ */
 function timesort(dumpArray){
-
     var timestamp = dumpArray[1].slice(0,8);
     var daySort = [];
     var x = 0;
@@ -95,6 +104,11 @@ function timesort(dumpArray){
     return daySort;
 }
 
+/*
+ *this filename is generated with the timestamp of the photo so we wrote this function to determine the day from the filename
+ *the first 4 characters are the year, the next two are the month, and the next two are the date
+ *we found the hour, minute, and second when used for grouping purposes was largely insignificant
+ */
 function timeGet(img){
     var  year = img.slice(0,4);
     var month = img.slice(4,6);
@@ -103,6 +117,10 @@ function timeGet(img){
     return date;
 }
 
+/*
+ *this function generates sub arrays from the larger array of all the filenames
+ *it reads through the array and generates a sub array of the images from one day.
+ */
 function get_today_array(day_splits, files, img_page){
     var acm = 0;
     for(var i = 0; i < day_splits.length; i++){
@@ -115,6 +133,9 @@ function get_today_array(day_splits, files, img_page){
     return null;
 }
 
+/*
+ *  Dynamically generates an html div of images for the given page.
+ */
 function build_img_div(files, img_page){
     var day_splits = timesort(files);
     var today_array = get_today_array(day_splits, files, img_page);
@@ -134,6 +155,10 @@ function build_img_div(files, img_page){
     return html_str;
 }
 
+/*
+ * Serve the url /grid/###, where ### is a number corresponding to the current image page number.
+ * From this, we can later generate a <div> of images.
+ */
 function serve_img_grid(urlobj, res){
     var path = urlobj.pathname.split('/')[2];
     img_page = parseInt(path);
@@ -230,6 +255,9 @@ function url_dispatch(urlobj, res){
 
 }
 
+/*
+ * Actually create the server.
+ */
 http.createServer(function (req, res) {
     urlobj = url.parse(req.url);
     url_dispatch(urlobj, res);
