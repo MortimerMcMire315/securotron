@@ -2,7 +2,7 @@
 
 <html>
 <head>
-<link href='http://fonts.googleapis.com/css?family=Lato:100' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Lato:100,300' rel='stylesheet' type='text/css'>
 <title>Raspberry Pi Surveillance System</title>
 <style>
 
@@ -43,27 +43,35 @@
     .forward-back-buttons-container {
         float:right;
         margin-right:13%;
-        padding-top:10px;
+        //padding-top:10px;
+    }
+    
+    .no-more-images {
+        font-family:'Lato', sans-serif;
+        margin-bottom:5px;
+        font-weight:300;
+        font-size:20px;
+        color:#ff0000;
+        opacity:0;
     }
 
     .forward-back-buttons {
         width:30px;
         height:30px;
     }
-    
+
     .date-div {
-        padding-top:0;
-        margin-top:0;
-        width:70%;
+        padding-left:13%;
+        padding-top:44px;
+        width:800px;
     }
 
-    .date {
+    .date-str {
         font-family:'Lato', sans-serif;
         font-weight:100;
         font-size:28px;
         color:#eeeeee;
         text-align:left;
-        padding-left:15%;
         display:inline;
     }
 
@@ -80,7 +88,13 @@
         float:none;
     }
     
+    .img-grid {
+        margin-top:0px;
+    }
+    
     .image {
+        width:320px;
+        height:240px;
         margin-top:10px;
         margin-left:5px;
         margin-right:5px;

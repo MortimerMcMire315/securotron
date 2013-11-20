@@ -1,6 +1,11 @@
 var current_page = 0;
 
 $(document).ready(function() {
+    $('.no-more-images').hover(function(e) {
+        e.preventDefault();
+        $(this).css('cursor', 'default');
+    });
+    
     $('.forward-back-buttons').hover(function(e) {
         e.preventDefault();
         $(this).css('cursor', 'pointer');
@@ -15,7 +20,10 @@ $(document).ready(function() {
             data: {},
             type: 'post',
             error: function() {
-                alert('No more images.');
+                $('.no-more-images').fadeTo(450, 0.98, function () {
+                    $(this).fadeTo(200,0.98);
+                    $(this).fadeTo(800, 0);
+                });
             },
             success: function() {
                 $('.img-div').fadeOut(400, function() {
@@ -33,7 +41,10 @@ $(document).ready(function() {
             data: {},
             type: 'post',
             error: function() {
-                alert('No more images.');
+                $('.no-more-images').fadeTo(450, 0.98, function () {
+                    $(this).fadeTo(200,0.98);
+                    $(this).fadeTo(800, 0);
+                });
             },
             success: function(){
                 $('.img-div').fadeOut(400, function() {

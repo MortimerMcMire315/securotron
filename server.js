@@ -58,9 +58,14 @@ function serve_img_url(urlobj, res){
             return;
         }
 
-        var img = fs.readFileSync('./img/' + image_in_question);
-        res.writeHead(200, {'Content-Type': 'image/jpg'});
-        res.end(img, 'binary');
+        fs.readFile('./img/' + image_in_question, function(err, data) {
+            if(err) {
+                redirect404(res, '<h2>Image not found.</h2>');
+                return;
+            }
+            res.writeHead(200, {'Content-Type': 'image/jpg'});
+            res.end(data, 'binary');
+        });
     });
 }
 
@@ -87,20 +92,20 @@ function serve_static_files(urlobj, res){
  *when that day was over we added the number of pictures taken that day to the final array and resumed counting from 0
  */
 function timesort(dumpArray){
-    var timestamp = dumpArray[1].slice(0,8);
+    var current_day = dumpArray[0].slice(0,8);
     var daySort = [];
-    var x = 0;
+    var cur_day_array = [];
 
     for(var i = 0; i < dumpArray.length; i++){
-        if(timestamp == dumpArray[i].slice(0,8)){
-            x = x + 1;
-        } else {
-            daySort.push(x);
-            timestamp = dumpArray[i].slice(0,8);
-            x = 1;
+        if(dumpArray[i].slice(0,8) != current_day){
+            daySort.push(cur_day_array);
+            current_day = dumpArray[i].slice(0,8);
+            cur_day_array = [];
         }
+        
+        cur_day_array.push(dumpArray[i]);
     }
-    daySort.push(x);
+    daySort.push(cur_day_array);
     return daySort;
 }
 
@@ -121,16 +126,8 @@ function timeGet(img){
  *this function generates sub arrays from the larger array of all the filenames
  *it reads through the array and generates a sub array of the images from one day.
  */
-function get_today_array(day_splits, files, img_page){
-    var acm = 0;
-    for(var i = 0; i < day_splits.length; i++){
-        var old_acm = acm;
-        acm += day_splits[i];
-        if(i == img_page) {
-            return files.slice(old_acm, acm);
-        }
-    }
-    return null;
+function get_today_array(day_splits, img_page){
+    return day_splits[img_page];
 }
 
 /*
@@ -138,7 +135,7 @@ function get_today_array(day_splits, files, img_page){
  */
 function build_img_div(files, img_page){
     var day_splits = timesort(files);
-    var today_array = get_today_array(day_splits, files, img_page);
+    var today_array = get_today_array(day_splits, img_page);
 
     var html_str = "";
     
@@ -146,11 +143,14 @@ function build_img_div(files, img_page){
         return null;
     }
 
-    html_str += "<div><p class='date'>you are currently viewing images from</p>\
-                 <p class='real-date'>" + timeGet(today_array[0]) + "</p>.</div><br>";
+    html_str += "<nobr><div class='date-div'><p class='date-str'>you are currently viewing images from</p>\
+                 <p class='real-date'>" + timeGet(today_array[0]) + "</p><p class='date-str'>\
+                 .</p></div></nobr><br>";
+    html_str += "<div class='img-grid'>";
     for(var i = 0; i < today_array.length; i++){
         html_str += "<img src='/imgbyname/" + today_array[i] + "' class='image'>\n"
     }
+    html_str +=  "</div>";
     
     return html_str;
 }
@@ -229,9 +229,10 @@ function url_dispatch(urlobj, res){
             break;
 
         case 'code':
-            var text = fs.readFileSync('./server.js');    
-            res.writeHead(200, {'Content-Type': 'text/plain'});
-            res.end(text);
+            fs.readFile('./server.js', function(err, data) {
+                res.writeHead(200, {'Content-Type': 'text/plain'});
+                res.end(data);
+            });    
             break;
             
         case 'grid':
@@ -243,9 +244,10 @@ function url_dispatch(urlobj, res){
             break;
 
         case 'favicon.ico':
-            var img = fs.readFileSync('./static/images/favicon.ico');
-            res.writeHead(200, {'Content-Type': 'image/x-icon'});
-            res.end(img,'binary');
+            fs.readFile('./static/images/favicon.ico', function(err, data) {
+                res.writeHead(200, {'Content-Type': 'image/x-icon'});
+                res.end(data,'binary');
+            });
             break;
 
         default:
